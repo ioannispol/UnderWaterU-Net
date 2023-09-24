@@ -1,4 +1,7 @@
-# TODO: Remove this file once we have real tests
+"""
+This module contains dummy tests for UnderWaterU-Net.
+"""
+
 
 def test_dummy():
     assert (1 + 1) == 2
