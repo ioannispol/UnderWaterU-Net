@@ -10,7 +10,8 @@ setup(
         'numpy',
         'scipy',
         'matplotlib',
-        'pandas'
+        'pandas',
+        'torch ~= 2.0',
     ],
     extras_require={
         'dev': [
