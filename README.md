@@ -49,3 +49,24 @@ This project is licensed under the XYZ License - see the [LICENSE.md](link_to_li
 
 For any queries, feel free to reach out to [ioannispol](mailto:your_email@example.com). 
 <!-- Replace with your email or contact details. -->
+
+## Attention Mechanisms in U-Net
+
+The U-Net architecture has been extended to include attention gates, which allow the model to focus on specific regions of the input, enhancing its capability to segment relevant regions more accurately.
+
+### AttentionGate Module
+
+The AttentionGate module takes two inputs, \( g \) and \( x \), and computes the attention coefficients. These coefficients are used to weight the features in \( x \) to produce the attended features. The process can be summarized as follows:
+
+1. Two 1x1 convolutions transform \( g \) and \( x \) into a compatible space.
+2. A non-linearity (ReLU) is applied after summing the transformed versions of \( g \) and \( x \).
+3. Another 1x1 convolution followed by a sigmoid activation produces the attention coefficients in the range [0, 1].
+4. The original \( x \) is multiplied by the attention coefficients to obtain the attended features.
+
+This mechanism is particularly useful in tasks like image segmentation, enabling the network to emphasize more informative regions during training and prediction.
+
+### Reference
+
+The attention mechanism is inspired by the following paper:
+- Oktay, O., Schlemper, J., Folgoc, L. L., Lee, M., Heinrich, M., Misawa, K., ... & Glocker, B. (2018). Attention U-Net: Learning where to look for the pancreas. arXiv preprint arXiv:1804.03999.
+
