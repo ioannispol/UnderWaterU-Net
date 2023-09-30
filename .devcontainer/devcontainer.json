@@ -9,7 +9,9 @@
 		"dockerfile": "../Dockerfile"
 	},
 	"features": {},
-    "postCreateCommand": "echo 'Development container for UWUNet is ready!'",
+    "postCreateCommand": {
+        "post_create": ".devcontainer/setup.sh"
+    },
 
     "containerEnv": {
         "PYTHONPATH": "${containerWorkspaceFolder}"
