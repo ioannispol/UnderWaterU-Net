@@ -12,7 +12,7 @@ setup(
         'matplotlib',
         'pandas',
         'torch ~= 2.0',
-        'opencv-python',
+        'opencv-python'
     ],
     extras_require={
         'dev': [
