@@ -114,6 +114,11 @@ class AttentionGate(nn.Module):
         )
 
     def forward(self, g, x):
+        # Adjusting spatial dimensions to match
+        diffY = x.size()[2] - g.size()[2]
+        diffX = x.size()[3] - g.size()[3]
+        g = F.pad(g, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+        
         g1 = self.W_g(g)
         x1 = self.W_x(x)
         psi = self.psi(F.relu(g1 + x1))

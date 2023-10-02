@@ -47,10 +47,10 @@ class AttentionUNet(UNet):
         super(AttentionUNet, self).__init__(n_channels, n_classes, bilinear)
         
         # Define the attention gates
-        self.att1 = AttentionGate(512, 512, 256)
-        self.att2 = AttentionGate(256, 256, 128)
-        self.att3 = AttentionGate(128, 128, 64)
-        self.att4 = AttentionGate(64, 64, 32)
+        self.att1 = AttentionGate(1024, 512, 256)  # Adjusted F_g for att1
+        self.att2 = AttentionGate(512, 256, 128)
+        self.att3 = AttentionGate(256, 128, 64)
+        self.att4 = AttentionGate(128, 64, 32)
 
     def forward(self, x):
         # Encoder
