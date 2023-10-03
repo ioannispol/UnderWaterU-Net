@@ -6,3 +6,4 @@ wandb
 jupyterlab
 torch >= 2.0
 opencv-python <=4.8.0.74
+dowhy
