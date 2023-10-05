@@ -8,7 +8,24 @@
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "../Dockerfile"
 	},
-	"features": {},
+	"features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+			"installzsh": true,
+			"configurezshasdefaultshell": true,
+			"installohmyzsh": true,
+			"upgradePackages": false
+		},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": true,
+			"installdockerbuildx": true,
+			"version": "20.10",
+			"dockerdashcomposeversion": "v2"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"installDirectlyFromGitHubRelease": true,
+			"version": "latest"
+		}
+    },
     "postCreateCommand": {
         "post_create": ".devcontainer/setup.sh"
     },
@@ -28,8 +45,8 @@
         }
     },
     "runArgs": [
-       // "--runtime=nvidia",
-       // "--gpus=all"
+       //"--runtime=nvidia",
+       "--gpus=all"
     ]
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
