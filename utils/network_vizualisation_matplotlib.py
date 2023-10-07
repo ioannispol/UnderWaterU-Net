@@ -1,7 +1,6 @@
 import sys
 import io
 import matplotlib.pyplot as plt
-from torchsummary import summary
 import networkx as nx
 from matplotlib.patches import FancyBboxPatch
 from underwater_unet.model import AttentionUNet
@@ -37,7 +36,7 @@ def plot_model(model, input_size, filename):
         if prev_name:
             connections.append((prev_name, name))
         prev_name = name
-
+        
     # Generate plot
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.axis('off')
@@ -63,9 +62,6 @@ def plot_model(model, input_size, filename):
     plt.tight_layout()
     plt.savefig(filename, bbox_inches='tight')
     plt.close()
-
-    return filename
-
 
 # Generate the model visualization
 image_path = plot_model(model, (3, 256, 256), "unet_attention_model_viz.png")

@@ -11,6 +11,7 @@ Welcome to UnderWaterU-Net, a deep learning repository specially optimized for u
 - **Expandable with Submodules**: Modular design allows for easy expansion and incorporation of additional functionalities.
 - **Streamlined Workflow**: From raw underwater images to precise segmentations, UnderWaterU-Net makes the process seamless.
 
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -68,4 +69,5 @@ This mechanism is particularly useful in tasks like image segmentation, enabling
 
 The attention mechanism is inspired by the following paper:
 - Oktay, O., Schlemper, J., Folgoc, L. L., Lee, M., Heinrich, M., Misawa, K., ... & Glocker, B. (2018). Attention U-Net: Learning where to look for the pancreas. arXiv preprint arXiv:1804.03999.
+
 
