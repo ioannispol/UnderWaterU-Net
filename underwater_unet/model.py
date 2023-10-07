@@ -45,7 +45,7 @@ class UNet(nn.Module):
 class AttentionUNet(UNet):
     def __init__(self, n_channels, n_classes, bilinear=False):
         super(AttentionUNet, self).__init__(n_channels, n_classes, bilinear)
-        
+
         # Define the attention gates
         self.att1 = AttentionGate(1024, 512, 256)  # Adjusted F_g for att1
         self.att2 = AttentionGate(512, 256, 128)
@@ -59,18 +59,18 @@ class AttentionUNet(UNet):
         x3 = checkpoint(self.down2, x2)
         x4 = checkpoint(self.down3, x3)
         x5 = checkpoint(self.down4, x4)
-        
+
         # Apply attention before upsampling
         x4 = self.att1(g=x5, x=x4)
         x3 = self.att2(g=x4, x=x3)
         x2 = self.att3(g=x3, x=x2)
         x1 = self.att4(g=x2, x=x1)
-        
+
         # Decoder
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        
+
         logits = self.outc(x)
         return logits

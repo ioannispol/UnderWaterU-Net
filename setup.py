@@ -9,6 +9,7 @@ setup(
         'setuptools',
         'numpy',
         'scipy',
+        'dowhy',
         'matplotlib',
         'pandas',
         'torch ~= 2.0',

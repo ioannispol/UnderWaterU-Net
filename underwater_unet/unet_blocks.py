@@ -94,13 +94,13 @@ class OutConv(nn.Module):
 class AttentionGate(nn.Module):
     def __init__(self, F_g, F_l, F_int):
         super(AttentionGate, self).__init__()
-        
+
         # Define the two 1x1 convolutions
         self.W_g = nn.Sequential(
             nn.Conv2d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=True),
             nn.BatchNorm2d(F_int)
         )
-        
+
         self.W_x = nn.Sequential(
             nn.Conv2d(F_l, F_int, kernel_size=1, stride=1, padding=0, bias=True),
             nn.BatchNorm2d(F_int)
@@ -118,7 +118,7 @@ class AttentionGate(nn.Module):
         diffY = x.size()[2] - g.size()[2]
         diffX = x.size()[3] - g.size()[3]
         g = F.pad(g, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
-        
+
         g1 = self.W_g(g)
         x1 = self.W_x(x)
         psi = self.psi(F.relu(g1 + x1))

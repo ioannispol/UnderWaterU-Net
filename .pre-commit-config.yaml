@@ -1,0 +1,46 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0  # Use the version you prefer
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+
+-   repo: https://github.com/psf/black
+    rev: 21.9b0  # Use the version you prefer
+    hooks:
+    -   id: black
+        args: ['--safe']
+
+-   repo: https://github.com/pycqa/flake8
+    rev: 3.9.2  # Use the version you prefer
+    hooks:
+    -   id: flake8
+
+-   repo: https://github.com/pre-commit/mirrors-autopep8 # Auto formatting
+    rev: v2.0.2
+    hooks:
+    -   id: autopep8
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v1.2.3
+    hooks:
+      - id: flake8 # Checking PEP8 that was not corrected by autopep8
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+-   repo: https://github.com/kynan/nbstripout
+    rev: 0.6.1
+    hooks:
+      - id: nbstripout # Remove outputs from notebooks
+
+-   repo: https://github.com/nbQA-dev/nbQA # Same as above but for notebooks content
+    rev: 1.7.0
+    hooks:
+      - id: nbqa-autopep8
+      - id: nbqa-flake8
+        args: [--ignore=F401] # Ignore unused imports as they are not fixed automatically
+      - id: nbqa-isort
