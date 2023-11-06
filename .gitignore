@@ -162,3 +162,7 @@ cython_debug/
 # Datasets
 data/
 *.npy
+
+# Experiments
+./experiment/
+*.pth

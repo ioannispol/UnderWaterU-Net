@@ -13,6 +13,7 @@ setup(
         'matplotlib',
         'pandas',
         'torch ~= 2.0',
+        'torchvision',
         'opencv-python <=4.8.0.74'
     ],
     extras_require={
@@ -26,5 +27,5 @@ setup(
     packages=find_packages(
         include=['underwater_unet', 'underwater_unet*'],
         exclude=['tests', 'tests.*', 'notebooks']
-        ),
+    ),
 )

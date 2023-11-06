@@ -23,8 +23,10 @@ def load_image(filename: Union[str, Path]) -> Union[np.ndarray, None]:
 
 
 def mask_values_unique(idx: int, mask_dir: Path, mask_suffix: str) -> np.ndarray:
-    mask_file = list(mask_dir.glob(idx + mask_suffix + '.*'))[0]
-    mask = np.asarray(load_image(mask_file))
+    mask_file = list(mask_dir.glob('mask-' + idx + mask_suffix + '.*'))
+    if not mask_file:
+        raise FileNotFoundError(f"No mask file found for index {idx} with suffix '{mask_suffix}' in {mask_dir}")
+    mask = np.asarray(load_image(mask_file[0]))
     if mask.ndim == 2:
         return np.unique(mask)
     elif mask.ndim == 3:
@@ -99,7 +101,7 @@ class BasicDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict:
         name = self.ids[idx]
-        mask_file = list(self.mask_dir.glob(name + self.mask_suffix + '.*'))
+        mask_file = list(self.mask_dir.glob('mask-' + name + self.mask_suffix + '.*'))
         img_file = list(self.images_dir.glob(name + '.*'))
 
         assert len(img_file) == 1, f'Either no image or multiple images found for the ID {name}: {img_file}'
