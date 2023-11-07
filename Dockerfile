@@ -9,6 +9,7 @@ RUN apt clean && \
     apt-get update && \
     apt-get install -y wget  \
    # apt-get install -y libgl1-mesa-glx \
+
     git -y && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
      /bin/bash ~/miniconda.sh -b -p /opt/miniconda

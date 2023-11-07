@@ -195,6 +195,8 @@ if __name__ == '__main__':
 
     # Set device for training
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = UNet(n_channels=3, n_classes=1).to(device)
+    train_model(model=model, device=device)
 
     # Initialize and transfer the U-Net model to the device
     model = UNet(n_channels=3, n_classes=args.n_classes, bilinear=args.bilinear).to(device)
