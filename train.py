@@ -1,6 +1,8 @@
 import os
 import argparse
 
+
+import wandb
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -51,6 +53,20 @@ def train_model(
     # Initialize learning rate scheduler
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=2)
 
+    # Initialize experimnet logging
+    wandb.init(project="UW-Unet", config={
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "learning_rate": learning_rate,
+        "val_percent": val_percent,
+        "save_checkpoint": save_checkpoint,
+        "amp": amp,
+        "weight_decay": weight_decay,
+        "momentum": momentum,
+        "gradient_clipping": gradient_clipping,
+    })
+    config = wandb.config
+
     # Training loop
     for epoch in tqdm(range(epochs), desc="Epochs"):
         model.train()
@@ -93,6 +109,14 @@ def train_model(
 
             epoch_loss += loss.item()
 
+        # Log training loss after each epoch
+        train_loss = epoch_loss / len(train_loader)
+        wandb.log({
+            "epoch": epoch,
+            "training_loss": train_loss,
+        }, step=epoch)
+
+
         val_loss = 0
         model.eval()
 
@@ -107,20 +131,41 @@ def train_model(
                 loss = bce + dice  # Consistent with training loss
                 val_loss += loss.item()
 
+                # Log the predicted masks and the true masks as images
+                wandb.log({
+                    "val_images": [wandb.Image(image.cpu(), caption="Val Image") for image in images],
+                    "val_masks": [wandb.Image(mask.cpu(), caption="True Mask") for mask in masks],
+                    "val_predictions": [wandb.Image(torch.sigmoid(output).cpu(),
+                                                    caption="Pred Mask") for output in outputs],
+                }, step=epoch)
+
         scheduler.step(val_loss)
+        # Calculate and log the average validation loss
+        val_loss_avg = val_loss / len(val_loader)
+        wandb.log({
+            "epoch": epoch,
+            "validation_loss": val_loss_avg,
+        }, step=epoch)
+
+        # Log histograms of model parameters
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                wandb.log({f"{name}": wandb.Histogram(param.detach().cpu().numpy())}, step=epoch)
 
         print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {epoch_loss / len(train_loader):.4f}, \
               Validation Loss: {val_loss / len(val_loader):.4f}')
 
-        # Save the model
-        if save_checkpoint:
-            os.makedirs("experiment", exist_ok=True)
-            torch.save(model.state_dict(), f"experiment/model_epoch_{epoch + 1}.pth")
+        if config.save_checkpoint:
+            checkpoint_dir = os.path.join(wandb.run.dir, "checkpoints")
+            os.makedirs(checkpoint_dir, exist_ok=True)  # Make sure the checkpoint directory exists
+            checkpoint_path = os.path.join(checkpoint_dir, f"model_epoch_{epoch + 1}.pth")
+            torch.save(model.state_dict(), checkpoint_path)
+            wandb.save(checkpoint_path)
+            wandb.log({"checkpoints": wandb.save(checkpoint_path)})
 
     print("Training completed.")
 
-
-# Rest of the script remains unchanged
+        scheduler.step(val_loss)
 
 
 def get_args():
@@ -136,12 +181,38 @@ def get_args():
     parser.add_argument('--momentum', type=float, default=0.9, help='Momentum used in optimization')
     parser.add_argument('--n-classes', type=int, default=1, help='Number of classes for segmentation')
     parser.add_argument('--bilinear', action='store_true', help='Use bilinear upsampling')
+    parser.add_argument('--gradient-clipping', type=float, default=1.0, help='Max norm of the gradients')
     # You can add more arguments as required
 
     return parser.parse_args()
 
 
 if __name__ == '__main__':
+    # Parse command line arguments
+    args = get_args()
+
+    # Initialize wandb
+    wandb.init(project="UW-Unet1", config=args)
+
+    # Set device for training
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = UNet(n_channels=3, n_classes=1).to(device)
     train_model(model=model, device=device)
+
+    # Initialize and transfer the U-Net model to the device
+    model = UNet(n_channels=3, n_classes=args.n_classes, bilinear=args.bilinear).to(device)
+
+    # Pass the configurations from wandb to your training function
+    train_model(
+        model=model,
+        device=device,
+        epochs=wandb.config.epochs,
+        batch_size=wandb.config.batch_size,
+        learning_rate=wandb.config.learning_rate,
+        val_percent=wandb.config.val_percent,
+        save_checkpoint=wandb.config.save_checkpoint,
+        amp=wandb.config.amp,
+        weight_decay=wandb.config.weight_decay,
+        momentum=wandb.config.momentum,
+        gradient_clipping=wandb.config.gradient_clipping
+    )
