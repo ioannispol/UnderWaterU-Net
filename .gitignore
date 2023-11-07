@@ -166,3 +166,4 @@ data/
 # Experiments
 ./experiment/
 *.pth
+./wandb/

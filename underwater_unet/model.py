@@ -29,11 +29,11 @@ class UNet(nn.Module):
         self.outc = (OutConv(64, n_classes))
 
     def forward(self, x):
-        x1 = checkpoint(self.inc, x)
-        x2 = checkpoint(self.down1, x1)
-        x3 = checkpoint(self.down2, x2)
-        x4 = checkpoint(self.down3, x3)
-        x5 = checkpoint(self.down4, x4)
+        x1 = checkpoint(self.inc, x, use_reentrant=False)
+        x2 = checkpoint(self.down1, x1, use_reentrant=False)
+        x3 = checkpoint(self.down2, x2, use_reentrant=False)
+        x4 = checkpoint(self.down3, x3, use_reentrant=False)
+        x5 = checkpoint(self.down4, x4, use_reentrant=False)
         x = self.up1(x5, x4)
         x = self.up2(x, x3)
         x = self.up3(x, x2)
@@ -54,7 +54,7 @@ class AttentionUNet(UNet):
 
     def forward(self, x):
         # Encoder
-        x1 = checkpoint(self.inc, x)
+        x1 = checkpoint(self.inc, x,  use_reentrant=False)
         x2 = checkpoint(self.down1, x1)
         x3 = checkpoint(self.down2, x2)
         x4 = checkpoint(self.down3, x3)
