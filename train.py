@@ -1,6 +1,7 @@
 import os
 import argparse
 
+
 import wandb
 import torch
 import torch.nn as nn
@@ -115,6 +116,7 @@ def train_model(
             "training_loss": train_loss,
         }, step=epoch)
 
+
         val_loss = 0
         model.eval()
 
@@ -163,8 +165,7 @@ def train_model(
 
     print("Training completed.")
 
-
-# Rest of the script remains unchanged
+        scheduler.step(val_loss)
 
 
 def get_args():
