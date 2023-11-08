@@ -29,10 +29,11 @@ def predict(image, model_name):
     model = loaded_models[model_name]  # Get the model based on the model name
     output = predict_image(model, image, device)
     mask_image = mask_to_image(output)
+
     return mask_image
 
 
-# Load your trained model (adjust the path to your .pth file)
+# Load trained model (adjust the path to your .pth file)
 model_path = 'experiment/exp_22g93hvt/model_epoch_8.pth'
 model = load_model(model_path)
 
