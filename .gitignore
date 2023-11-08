@@ -166,5 +166,9 @@ data/
 # Experiments
 ./experiment/
 *.pth
-
 wandb/
+
+# Images
+*.png
+*.jpg
+

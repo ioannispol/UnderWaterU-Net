@@ -65,10 +65,15 @@ def train_model(
         "momentum": momentum,
         "gradient_clipping": gradient_clipping,
     })
-    config = wandb.config
+
+    experiment_id = f"exp_{wandb.run.id}"
+    local_checkpoint_dir = os.path.join("experiment", experiment_id)
+    os.makedirs(local_checkpoint_dir, exist_ok=True)
+
+    best_val_loss = float("inf")
 
     # Training loop
-    for epoch in tqdm(range(epochs), desc="Epochs"):
+    for epoch in tqdm(range(1, epochs + 1), desc="Epochs"):
         model.train()
         epoch_loss = 0
         # Inside the training loop
@@ -116,7 +121,6 @@ def train_model(
             "training_loss": train_loss,
         }, step=epoch)
 
-
         val_loss = 0
         model.eval()
 
@@ -142,6 +146,7 @@ def train_model(
         scheduler.step(val_loss)
         # Calculate and log the average validation loss
         val_loss_avg = val_loss / len(val_loader)
+
         wandb.log({
             "epoch": epoch,
             "validation_loss": val_loss_avg,
@@ -155,17 +160,26 @@ def train_model(
         print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {epoch_loss / len(train_loader):.4f}, \
               Validation Loss: {val_loss / len(val_loader):.4f}')
 
-        if config.save_checkpoint:
-            checkpoint_dir = os.path.join(wandb.run.dir, "checkpoints")
-            os.makedirs(checkpoint_dir, exist_ok=True)  # Make sure the checkpoint directory exists
-            checkpoint_path = os.path.join(checkpoint_dir, f"model_epoch_{epoch + 1}.pth")
+
+        if val_loss_avg < best_val_loss:
+            best_val_loss = val_loss_avg
+
+            # Save the checkpoint in the unique directory
+            checkpoint_path = os.path.join(local_checkpoint_dir, f"model_epoch_{epoch + 1}.pth")
             torch.save(model.state_dict(), checkpoint_path)
-            wandb.save(checkpoint_path)
-            wandb.log({"checkpoints": wandb.save(checkpoint_path)})
+
+            # Log the checkpoint as an artifact in WandB
+            artifact = wandb.Artifact('model-checkpoint', type='model')
+            artifact.add_file(checkpoint_path)
+            wandb.log_artifact(artifact)
+
+            # Optional: If you want to keep the checkpoint in the WandB directory structure as well
+            wandb_checkpoint_dir = os.path.join(wandb.run.dir, "checkpoints")
+            os.makedirs(wandb_checkpoint_dir, exist_ok=True)
+            wandb_checkpoint_path = os.path.join(wandb_checkpoint_dir, f"model_epoch_{epoch + 1}.pth")
+            torch.save(model.state_dict(), wandb_checkpoint_path)
 
     print("Training completed.")
-
-        scheduler.step(val_loss)
 
 
 def get_args():
@@ -182,7 +196,7 @@ def get_args():
     parser.add_argument('--n-classes', type=int, default=1, help='Number of classes for segmentation')
     parser.add_argument('--bilinear', action='store_true', help='Use bilinear upsampling')
     parser.add_argument('--gradient-clipping', type=float, default=1.0, help='Max norm of the gradients')
-    # You can add more arguments as required
+    # Add more arguments as required
 
     return parser.parse_args()
 
@@ -192,12 +206,11 @@ if __name__ == '__main__':
     args = get_args()
 
     # Initialize wandb
-    wandb.init(project="UW-Unet1", config=args)
+    wandb.init(project="UW-Unet5", config=args)
+    config = wandb.config
 
     # Set device for training
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = UNet(n_channels=3, n_classes=1).to(device)
-    train_model(model=model, device=device)
 
     # Initialize and transfer the U-Net model to the device
     model = UNet(n_channels=3, n_classes=args.n_classes, bilinear=args.bilinear).to(device)
@@ -206,13 +219,13 @@ if __name__ == '__main__':
     train_model(
         model=model,
         device=device,
-        epochs=wandb.config.epochs,
-        batch_size=wandb.config.batch_size,
-        learning_rate=wandb.config.learning_rate,
-        val_percent=wandb.config.val_percent,
-        save_checkpoint=wandb.config.save_checkpoint,
-        amp=wandb.config.amp,
-        weight_decay=wandb.config.weight_decay,
-        momentum=wandb.config.momentum,
-        gradient_clipping=wandb.config.gradient_clipping
+        epochs=config.epochs,
+        batch_size=config.batch_size,
+        learning_rate=config.learning_rate,
+        val_percent=config.val_percent,
+        save_checkpoint=config.save_checkpoint,
+        amp=config.amp,
+        weight_decay=config.weight_decay,
+        momentum=config.momentum,
+        gradient_clipping=config.gradient_clipping
     )
