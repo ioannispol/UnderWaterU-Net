@@ -14,7 +14,8 @@ setup(
         'pandas',
         'torch ~= 2.0',
         'torchvision',
-        'opencv-python <=4.8.0.74'
+        'opencv-python <=4.8.0.74',
+        'gradio'
     ],
     extras_require={
         'dev': [
