@@ -1,52 +1,34 @@
 import gradio as gr
 import torch
-import torchvision.transforms as transforms
-from PIL import Image
 
 from underwater_unet.model import UNet
+from prediction import predict_image, mask_to_image
 
-available_models = ["UW-Unet", "model1", "model2"]
+models = {
+    "UW-Unet": "experiment/exp_22g93hvt/model_epoch_8.pth",
+    "UW-Unet1": "experiment/exp_22g93hvt/model_epoch_4.pth",
+    "UW-Unet2": "experiment/exp_22g93hvt/model_epoch_2.pth"
+}
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 # Define a function to load the model
 def load_model(model_path):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = UNet(n_channels=3, n_classes=1)
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.eval().to(device)
     return model
 
 
+loaded_models = {name: load_model(path) for name, path in models.items()}
+
+
 # Define a function that will take an image input and predict the output using the trained model
 def predict(image, model_name):
-    if image is None:
-        raise ValueError("No image provided.")
-
-    if model_name == "UW-Unet":
-        # Load the UW-Unet model
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        model = load_model('experiment/exp_22g93hvt/model_epoch_8.pth')
-    else:
-        raise ValueError("Model not found.")
-
-    # Convert the PIL Image to a tensor
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        # Add any other transformations that were used in the training phase
-    ])
-
-    image = transform(image).unsqueeze(0).to(device)
-
-    # Predict the mask
-    with torch.no_grad():
-        output = model(image)
-
-    # Assuming a single-channel output, apply sigmoid and convert to an image
-    # If you have multi-class output, you'll need to adjust this
-    predicted_mask = torch.sigmoid(output[0, 0]).cpu().numpy()
-    predicted_mask = (predicted_mask * 255).astype('uint8')
-    mask_image = Image.fromarray(predicted_mask)
-
+    model = loaded_models[model_name]  # Get the model based on the model name
+    output = predict_image(model, image, device)
+    mask_image = mask_to_image(output)
     return mask_image
 
 
@@ -59,7 +41,7 @@ iface = gr.Interface(
     fn=predict,
     inputs=[
         gr.Image(),  # Adjust the shape to match your model's input shape
-        gr.Dropdown(choices=available_models, value="UW-Unet")
+        gr.Dropdown(choices=models, value="UW-Unet")
     ],
     outputs='image',
     examples=[
@@ -72,4 +54,4 @@ iface = gr.Interface(
 # ['data/images/076193.jpg', 'data/images/076350.jpg']
 
 # Launch the interface
-iface.launch()
+iface.launch(share=True)
