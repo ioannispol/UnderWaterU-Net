@@ -172,3 +172,6 @@ wandb/
 *.png
 *.jpg
 
+
+# Webb app
+flagged/
