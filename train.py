@@ -160,6 +160,7 @@ def train_model(
         print(f'Epoch {epoch + 1}/{epochs}, Training Loss: {epoch_loss / len(train_loader):.4f}, \
               Validation Loss: {val_loss / len(val_loader):.4f}')
 
+
         if val_loss_avg < best_val_loss:
             best_val_loss = val_loss_avg
 
